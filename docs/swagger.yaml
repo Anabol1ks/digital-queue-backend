@@ -1,0 +1,576 @@
+definitions:
+  handlers.Group:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      number:
+        type: string
+    type: object
+  handlers.GroupResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/handlers.Group'
+        type: array
+      limit:
+        type: integer
+      offset:
+        type: integer
+      total:
+        type: integer
+    type: object
+  handlers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  handlers.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      surname:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    - surname
+    type: object
+  handlers.UserQueueItem:
+    properties:
+      closes_at:
+        type: string
+      end_time:
+        type: string
+      group_numbers:
+        items:
+          type: string
+        type: array
+      is_active:
+        type: boolean
+      opens_at:
+        type: string
+      position:
+        type: integer
+      queue_id:
+        type: integer
+      schedule_id:
+        type: integer
+      schedule_name:
+        type: string
+      start_time:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      code:
+        description: |-
+          Код ошибки для программной обработки
+          example: VALIDATION_ERROR
+        type: string
+      details:
+        description: |-
+          Дополнительные детали об ошибке (опционально)
+          example: поле email должно быть валидным email адресом
+        type: string
+      message:
+        description: |-
+          Человекочитаемое сообщение об ошибке
+          example: Ошибка валидации данных
+        type: string
+    type: object
+  response.MessageResponse:
+    properties:
+      message:
+        example: Операция успешно выполнена
+        type: string
+    type: object
+  response.ProfileResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      surname:
+        type: string
+    type: object
+  response.SuccessResponse:
+    properties:
+      message:
+        example: Операция успешно выполнена
+        type: string
+    type: object
+  response.SwaggerParticipant:
+    properties:
+      name:
+        example: Иван
+        type: string
+      position:
+        example: 1
+        type: integer
+      surname:
+        example: Иванов
+        type: string
+      user_id:
+        example: 1
+        type: integer
+    type: object
+  response.SwaggerQueue:
+    properties:
+      closes_at:
+        example: "2023-01-01T10:00:00Z"
+        type: string
+      created_at:
+        example: "2023-01-01T08:00:00Z"
+        type: string
+      id:
+        example: 1
+        type: integer
+      is_active:
+        example: true
+        type: boolean
+      max_participants:
+        example: 30
+        type: integer
+      opens_at:
+        example: "2023-01-01T09:00:00Z"
+        type: string
+      schedule_id:
+        example: 1
+        type: integer
+      updated_at:
+        example: "2023-01-01T08:00:00Z"
+        type: string
+    type: object
+  response.SwaggerQueueStatusResponse:
+    properties:
+      closes_at:
+        example: "2023-01-01T10:00:00Z"
+        type: string
+      is_active:
+        example: true
+        type: boolean
+      opens_at:
+        example: "2023-01-01T09:00:00Z"
+        type: string
+      participants:
+        items:
+          $ref: '#/definitions/response.SwaggerParticipant'
+        type: array
+      queue_id:
+        example: 1
+        type: integer
+      schedule_id:
+        example: 1
+        type: integer
+    type: object
+  response.SwaggerSchedule:
+    properties:
+      created_at:
+        example: "2023-01-01T09:00:00Z"
+        type: string
+      end_time:
+        example: "2023-01-01T12:00:00Z"
+        type: string
+      external_id:
+        example: "123456"
+        type: string
+      group_ids:
+        example: 67,203,111
+        type: string
+      id:
+        example: 1
+        type: integer
+      name:
+        example: Практика по программированию
+        type: string
+      start_time:
+        example: "2023-01-01T10:00:00Z"
+        type: string
+      updated_at:
+        example: "2023-01-01T09:00:00Z"
+        type: string
+    type: object
+  response.SwaggerScheduleWithQueue:
+    properties:
+      queue:
+        $ref: '#/definitions/response.SwaggerQueue'
+      schedule:
+        $ref: '#/definitions/response.SwaggerSchedule'
+    type: object
+  response.TokenResponse:
+    properties:
+      access_token:
+        description: |-
+          JWT токен для доступа к защищенным эндпоинтам
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      refresh_token:
+        description: |-
+          JWT токен для обновления access токена
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+info:
+  contact: {}
+  title: Онлайн очередь для сдачи практики
+paths:
+  /api/queues/{id}/join:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет пользователя в очередь и уведомляет других участников
+      parameters:
+      - description: ID очереди
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное вступление в очередь с указанием позиции
+          schema:
+            $ref: '#/definitions/response.MessageResponse'
+        "400":
+          description: Ошибка валидации (INVALID_QUEUE_ID, ALREADY_IN_QUEUE, QUEUE_INACTIVE)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Очередь не найдена (QUEUE_NOT_FOUND)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (DB_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Вступление в очередь
+      tags:
+      - queue
+  /api/queues/{id}/leave:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет пользователя из очереди и уведомляет других участников
+      parameters:
+      - description: ID очереди
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный выход из очереди
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Ошибка валидации (INVALID_QUEUE_ID, NOT_IN_QUEUE)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (DB_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Выход из очереди
+      tags:
+      - queue
+  /api/queues/{id}/status:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает информацию о состоянии очереди и списке участников
+      parameters:
+      - description: ID очереди
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное получение статуса очереди
+          schema:
+            $ref: '#/definitions/response.SwaggerQueueStatusResponse'
+        "400":
+          description: Ошибка валидации (INVALID_QUEUE_ID)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Очередь не найдена (QUEUE_NOT_FOUND)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (DB_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получение статуса очереди
+      tags:
+      - queue
+  /api/queues/{id}/ws:
+    get:
+      consumes:
+      - application/json
+      description: Устанавливает WebSocket соединение для получения обновлений очереди
+        в реальном времени
+      parameters:
+      - description: ID очереди
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "101":
+          description: Переключение протокола на WebSocket
+          schema:
+            type: string
+        "400":
+          description: Ошибка валидации (INVALID_QUEUE_ID)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (WEBSOCKET_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Подключение к WebSocket очереди
+      tags:
+      - websocket
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Авторизация пользователя и получение токенов
+      parameters:
+      - description: Данные для авторизации
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешная авторизация
+          schema:
+            $ref: '#/definitions/response.TokenResponse'
+        "400":
+          description: Ошибка валидации данных (VALIDATION_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Неверные учетные данные (INVALID_CREDENTIALS)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (TOKEN_GENERATION_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Авторизация пользователя
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Обновление access токена с помощью refresh токена
+      parameters:
+      - description: Refresh токен
+        in: body
+        name: refresh_token
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное обновление access токена
+          schema:
+            $ref: '#/definitions/response.TokenResponse'
+        "400":
+          description: Ошибка валидации данных (VALIDATION_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Неверный или просроченный refresh токен (INVALID_REFRESH_TOKEN)
+            или пользователь не найден (USER_NOT_FOUND)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (TOKEN_GENERATION_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Обновление access токена
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Регистрация нового пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Успешная регистрация
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Ошибка валидации (VALIDATION_ERROR) или пользователь уже существует
+            (EMAIL_EXISTS)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (PASSWORD_HASH_ERROR, DB_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Регистрация пользователя
+      tags:
+      - auth
+  /groups:
+    get:
+      consumes:
+      - application/json
+      description: Получает список всех групп, кэширует результат в Redis
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными групп
+          schema:
+            $ref: '#/definitions/handlers.GroupResponse'
+        "500":
+          description: Ошибка сервера (API_ERROR, CACHE_ERROR, DECODE_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Получение списка групп
+      tags:
+      - groups
+  /profile:
+    get:
+      consumes:
+      - application/json
+      description: Получение данных пользователя по токену
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешное получение данных пользователя
+          schema:
+            $ref: '#/definitions/response.ProfileResponse'
+        "401":
+          description: Ошибка авторизации (UNAUTHORIZED)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (DB_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получение данных пользователя
+      tags:
+      - profile
+  /profile/queues:
+    get:
+      consumes:
+      - application/json
+      description: Получение списка очередей, в которых пользователь участвует
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of queues the user is part of
+          schema:
+            items:
+              $ref: '#/definitions/handlers.UserQueueItem'
+            type: array
+        "500":
+          description: Server error (DB_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получение списка своих очередей
+      tags:
+      - profile
+  /schedule:
+    get:
+      consumes:
+      - application/json
+      description: Получает расписание по заданным параметрам (group_id), кэширует
+        результат в Redis
+      parameters:
+      - description: ID группы
+        in: query
+        name: group_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ с данными расписания и связанными очередями
+          schema:
+            items:
+              $ref: '#/definitions/response.SwaggerScheduleWithQueue'
+            type: array
+        "400":
+          description: Ошибка валидации данных (MISSING_GROUP_ID)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера (DB_ERROR, API_ERROR, DECODE_ERROR)
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Получение расписания
+      tags:
+      - schedule
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
