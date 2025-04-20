@@ -1,4 +1,11 @@
 definitions:
+  handlers.ForgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   handlers.Group:
     properties:
       id:
@@ -54,6 +61,17 @@ definitions:
     - name
     - password
     - surname
+    type: object
+  handlers.ResetPasswordRequest:
+    properties:
+      password:
+        minLength: 6
+        type: string
+      token:
+        type: string
+    required:
+    - password
+    - token
     type: object
   handlers.UserQueueItem:
     properties:
@@ -369,6 +387,40 @@ paths:
       summary: Подключение к WebSocket очереди
       tags:
       - websocket
+  /auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Отправляет письмо с ссылкой для сброса пароля на указанный email
+      parameters:
+      - description: Email пользователя
+        in: body
+        name: email
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Письмо отправлено
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Ошибка валидации данных
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Запрос на сброс пароля
+      tags:
+      - auth
   /auth/login:
     post:
       consumes:
@@ -467,6 +519,40 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: Регистрация пользователя
+      tags:
+      - auth
+  /auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Сбрасывает пароль пользователя на основе токена из письма
+      parameters:
+      - description: Токен и новый пароль
+        in: body
+        name: reset_password
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пароль успешно сброшен
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Ошибка валидации данных
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Неверный или истекший токен
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Сброс пароля
       tags:
       - auth
   /groups:

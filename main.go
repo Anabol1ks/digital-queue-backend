@@ -60,6 +60,8 @@ func main() {
 		authGroup.POST("/login", handlers.Login)
 		authGroup.POST("/register", handlers.Register)
 		authGroup.POST("/refresh", handlers.RefreshToken)
+		authGroup.POST("/forgot-password", handlers.ForgotPassword)
+		authGroup.POST("/reset-password", handlers.ResetPassword)
 	}
 
 	profileGroup := r.Group("/profile", auth.AuthMiddleware())

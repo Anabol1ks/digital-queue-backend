@@ -15,6 +15,7 @@
   - [API-эндпоинты](#api-эндпоинты)
     - [Общие сведения](#общие-сведения)
     - [Эндпоинты авторизации (`/auth`)](#эндпоинты-авторизации-auth)
+    - [Эндпоинты сброса пароля (`/auth`)](#эндпоинты-сброса-пароля-auth)
     - [Эндпоинты профиля (`/profile`)](#эндпоинты-профиля-profile)
     - [Эндпоинты групп и расписания](#эндпоинты-групп-и-расписания)
     - [Эндпоинты очереди (`/api/queues`)](#эндпоинты-очереди-apiqueues)
@@ -91,7 +92,7 @@
 Пример файла `.env`:
 
 ```ini
-# Параметры базы данных
+# Database configuration
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
@@ -105,13 +106,22 @@ TEST_DB_USER=postgres
 TEST_DB_PASSWORD=your_test_db_password
 TEST_DB_NAME=test_db
 
-# Redis
+# Redis configuration
 REDIS_ADDR=localhost:6379
 REDIS_PASS=
 
 # JWT Secrets
 JWT_ACCESS_SECRET=your_very_secure_jwt_access_secret_key_here
 JWT_REFRESH_SECRET=your_very_secure_jwt_refresh_secret_key_here
+
+# SMTP configuration for email sending
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-email-password
+
+# Frontend URL for password reset links
+URL_FRONT=http://localhost:3000
 
 ```
 
@@ -151,6 +161,23 @@ JWT_REFRESH_SECRET=your_very_secure_jwt_refresh_secret_key_here
 {
   "access_token": "eyJ...",
   "refresh_token": "eyJ..."
+}
+```
+
+---
+
+### Эндпоинты сброса пароля (`/auth`)
+
+| Метод | Путь              | Описание                         | Код ответа | Пример тела запроса                                                                         |
+|-------|-------------------|----------------------------------|------------|--------------------------------------------------------------------------------------------|
+| POST  | `/auth/forgot-password`  | Запрос на сброс пароля  | 200        | `{ "email": "user@example.com" }` |
+| POST  | `/auth/reset-password`     | Сброс пароля с использованием токена        | 200        | `{ "token": "abcdef123456", "password": "newpassword123" }`                          |
+
+
+Ответ при успешно запросе на сброс пароля:
+```json
+{
+  "message": "Пароль успешно сброшен"
 }
 ```
 ---
@@ -266,6 +293,8 @@ curl "http://localhost:8080/profile/queues" \
 | Ошибка `JWT` или `invalid signature`                       | Проверьте `JWT_SECRET` и `REFRESH_SECRET` в `.env`, убедитесь, что они совпадают с теми, что используются в коде.                                                 |
 | CORS-проблемы при запросах из браузера                     | Проверьте настройки CORS в `main.go`: по умолчанию разрешены все источники (`*`). Уточните необходимые домены в `AllowOrigins`.                                |
 | WebSocket не подключается                                  | Убедитесь, что заголовок `Authorization: Bearer <token>` передаётся правильно. Проверьте путь `ws://.../ws` и замените протокол на `wss://` при использовании HTTPS. |
+| Сервер не отправляет письма	| Убедитесь, что указаны правильные `SMTP_HOST`, `SMTP_USERNAME`, `SMTP_PASSWORD`. |
+| Токен для сброса пароля не работает | Убедитесь, что токен не истёк (по умолчанию срок действия — 1 час). |
 
 ---
 
