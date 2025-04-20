@@ -496,7 +496,7 @@
                 }
             }
         },
-        "/profile": {
+        "/profile/get": {
             "get": {
                 "security": [
                     {

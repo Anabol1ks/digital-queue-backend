@@ -574,7 +574,7 @@ paths:
       summary: Получение списка групп
       tags:
       - groups
-  /profile:
+  /profile/get:
     get:
       consumes:
       - application/json

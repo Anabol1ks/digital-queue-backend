@@ -268,7 +268,7 @@ func RefreshToken(c *gin.Context) {
 // @Success		200	{object}	response.ProfileResponse	"Успешное получение данных пользователя"
 // @Failure		401	{object}	response.ErrorResponse	"Ошибка авторизации (UNAUTHORIZED)"
 // @Failure		500	{object}	response.ErrorResponse	"Ошибка сервера (DB_ERROR)"
-// @Router			/profile [get]
+// @Router			/profile/get [get]
 func GetMyProfileHandler(c *gin.Context) {
 	userID := c.GetUint("userID")
 	if userID == 0 {

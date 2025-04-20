@@ -506,7 +506,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/profile": {
+        "/profile/get": {
             "get": {
                 "security": [
                     {

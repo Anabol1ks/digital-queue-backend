@@ -66,7 +66,7 @@ func main() {
 
 	profileGroup := r.Group("/profile", auth.AuthMiddleware())
 	{
-		profileGroup.GET("/", handlers.GetMyProfileHandler)
+		profileGroup.GET("/get", handlers.GetMyProfileHandler)
 		profileGroup.GET("/queues", handlers.GetUserQueuesHandler)
 	}
 
