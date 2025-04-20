@@ -354,7 +354,7 @@ func ForgotPassword(c *gin.Context) {
 	}
 	frontendURL := os.Getenv("URL_BACKEND")
 	// Отправка письма
-	resetLink := fmt.Sprintf(frontendURL+"/reset-password?token=%s", resetTokenHex)
+	resetLink := fmt.Sprintf(frontendURL+"/auth/reset-password?token=%s", resetTokenHex)
 	if err := sendResetPasswordEmail(user.Email, resetLink); err != nil {
 		c.JSON(http.StatusInternalServerError, response.ErrorResponse{
 			Code:    "EMAIL_ERROR",
